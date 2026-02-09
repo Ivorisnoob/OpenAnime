@@ -57,6 +57,7 @@ import com.ivor.openanime.data.remote.model.EpisodeDto
 @Composable
 fun DetailsScreen(
     onBackClick: () -> Unit,
+    onPlayClick: (Int, Int) -> Unit, // season, episode
     viewModel: DetailsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -149,7 +150,13 @@ fun DetailsScreen(
                         item {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Button(
-                                    onClick = { /* TODO: Play */ },
+                                    onClick = {
+                                        // Play logic: First episode of selected season, or S1E1 fallback
+                                        val seasonNum = seasonDetails?.seasonNumber 
+                                            ?: details.seasons.firstOrNull()?.seasonNumber ?: 1
+                                        val episodeNum = 1 // Default to first episode
+                                        onPlayClick(seasonNum, episodeNum)
+                                    },
                                     shape = ExpressiveShapes.large,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -211,7 +218,10 @@ fun DetailsScreen(
                                     items = episodes,
                                     key = { it.id }
                                 ) { episode ->
-                                    EpisodeItem(episode = episode)
+                                    EpisodeItem(
+                                        episode = episode,
+                                        onClick = { onPlayClick(episode.seasonNumber, episode.episodeNumber) }
+                                    )
                                 }
                             }
                         }
@@ -228,7 +238,10 @@ fun DetailsScreen(
 }
 
 @Composable
-fun EpisodeItem(episode: EpisodeDto) {
+fun EpisodeItem(
+    episode: EpisodeDto,
+    onClick: () -> Unit
+) {
     ListItem(
         headlineContent = { Text(episode.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         supportingContent = { Text("Episode ${episode.episodeNumber} • ${episode.voteAverage}", maxLines = 1) },
@@ -245,6 +258,6 @@ fun EpisodeItem(episode: EpisodeDto) {
                 )
             }
         },
-        modifier = Modifier.clickable { /* TODO: Play Episode */ }
+        modifier = Modifier.clickable(onClick = onClick)
     )
 }
