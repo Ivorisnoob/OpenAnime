@@ -1,0 +1,12 @@
+package com.ivor.openanime.domain.repository
+
+import com.ivor.openanime.data.remote.model.AnimeDetailsDto
+import com.ivor.openanime.data.remote.model.AnimeDto
+import com.ivor.openanime.data.remote.model.SeasonDetailsDto
+
+interface AnimeRepository {
+    suspend fun getPopularAnime(page: Int): Result<List<AnimeDto>>
+    suspend fun searchAnime(query: String, page: Int): Result<List<AnimeDto>>
+    suspend fun getAnimeDetails(id: Int): Result<AnimeDetailsDto>
+    suspend fun getSeasonDetails(animeId: Int, seasonNumber: Int): Result<SeasonDetailsDto>
+}
