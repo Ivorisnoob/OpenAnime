@@ -138,7 +138,7 @@ fun ExoPlayerView(
                         val format = group.getTrackFormat(trackIndex)
                         val label = format.label
                             ?: format.language?.let { lang ->
-                                java.util.Locale(lang).displayLanguage
+                                java.util.Locale.forLanguageTag(lang).displayLanguage
                             }
                             ?: "Subtitle ${subtitles.size + 1}"
 
@@ -168,10 +168,11 @@ fun ExoPlayerView(
 
     LaunchedEffect(videoUrl, subtitleUrl) {
         val currentMediaItem = exoPlayer.currentMediaItem
+        val currentUri = currentMediaItem?.localConfiguration?.uri
         val newUri = android.net.Uri.parse(videoUrl)
         
-        // Only update if the base video URL has changed
-        if (currentMediaItem?.localConfiguration?.uri != newUri) {
+        // CASE 1: Video URL changed (Episode switch) -> Full Reset
+        if (currentUri != newUri) {
             val mediaItemBuilder = MediaItem.Builder().setUri(videoUrl)
             
             subtitleUrl?.let { url ->
@@ -187,8 +188,30 @@ fun ExoPlayerView(
             val mediaItem = mediaItemBuilder.build()
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
-            exoPlayer.play() // Explicitly start playing
+            exoPlayer.play()
             isBuffering = true
+        } 
+        // CASE 2: Subtitle URL arrived later (extraction finished) -> Hot Update
+        else if (subtitleUrl != null && 
+                 currentMediaItem?.localConfiguration?.subtitleConfigurations?.isEmpty() == true) {
+            
+            val currentPosition = exoPlayer.currentPosition
+            val wasPlaying = exoPlayer.isPlaying
+            
+            val mediaItemBuilder = MediaItem.Builder().setUri(videoUrl)
+            val subtitleConfig = MediaItem.SubtitleConfiguration.Builder(android.net.Uri.parse(subtitleUrl!!))
+                .setMimeType(if (subtitleUrl!!.contains("format=srt")) "application/x-subrip" else "text/vtt")
+                .setLanguage("en")
+                .setLabel("English (Extracted)")
+                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                .build()
+            mediaItemBuilder.setSubtitleConfigurations(listOf(subtitleConfig))
+            
+            // Replace media item without resetting position if possible
+            exoPlayer.setMediaItem(mediaItemBuilder.build(), false)
+            exoPlayer.prepare() // Need to re-prepare to discover new text tracks
+            if (wasPlaying) exoPlayer.play()
+            Log.i("PlayerSubtitles", "Sideloaded subtitle successfully at $currentPosition")
         }
     }
 
@@ -236,6 +259,14 @@ fun ExoPlayerView(
                         isBuffering = false
                     }
                 }
+            }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                Log.e("PlayerError", "ExoPlayer Error: ${error.message}", error)
+                isBuffering = false
+                // Attempt to recover playback if it was just a subtitle load error
+                exoPlayer.prepare()
+                exoPlayer.play()
             }
 
             override fun onIsPlayingChanged(playing: Boolean) {
@@ -410,15 +441,15 @@ fun ExoPlayerView(
             onSubtitleSelected = { option ->
                 selectedSubtitle = option
                 if (option == null) {
-                    // Disable subtitles
-                    currentSubtitleText = ""
+                    // Disable subtitles explicitly for text type only
                     exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
                         .buildUpon()
                         .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                        .clearOverridesOfType(C.TRACK_TYPE_TEXT)
                         .build()
-                    exoPlayer.play() // Ensure it continues playing
+                    currentSubtitleText = ""
                 } else {
-                    // Enable selected subtitle track
+                    // Enable selected subtitle track using a specific override
                     val tracks = exoPlayer.currentTracks
                     if (option.groupIndex < tracks.groups.size) {
                         val group = tracks.groups[option.groupIndex]
@@ -426,14 +457,17 @@ fun ExoPlayerView(
                             group.mediaTrackGroup,
                             listOf(option.trackIndex)
                         )
+                        
                         exoPlayer.trackSelectionParameters = exoPlayer.trackSelectionParameters
                             .buildUpon()
                             .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
-                            .setOverrideForType(override)
+                            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                            .addOverride(override)
                             .build()
-                        exoPlayer.play() // Ensure it continues playing
                     }
                 }
+                // Always force play after parameter change to avoid "stuck on pause"
+                exoPlayer.play()
             }
         )
     }
