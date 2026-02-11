@@ -10,9 +10,13 @@ import androidx.navigation.navArgument
 import com.ivor.openanime.presentation.details.DetailsScreen
 import com.ivor.openanime.presentation.home.HomeScreen
 import com.ivor.openanime.presentation.player.PlayerScreen
+import com.ivor.openanime.presentation.search.SearchScreen
+import com.ivor.openanime.presentation.watch_history.WatchHistoryScreen
 
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
+    data object Search : Screen("search")
+    data object History : Screen("history")
     data object Details : Screen("details/{animeId}") {
         fun createRoute(animeId: Int) = "details/$animeId"
     }
@@ -31,6 +35,30 @@ fun AppNavigation(
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
+                onAnimeClick = { animeId ->
+                    navController.navigate(Screen.Details.createRoute(animeId))
+                },
+                onSearchClick = {
+                    navController.navigate(Screen.Search.route)
+                },
+                onHistoryClick = {
+                    navController.navigate(Screen.History.route)
+                }
+            )
+        }
+
+        composable(Screen.Search.route) {
+            SearchScreen(
+                onBackClick = { navController.popBackStack() },
+                onAnimeClick = { animeId ->
+                    navController.navigate(Screen.Details.createRoute(animeId))
+                }
+            )
+        }
+
+        composable(Screen.History.route) {
+            WatchHistoryScreen(
+                onBackClick = { navController.popBackStack() },
                 onAnimeClick = { animeId ->
                     navController.navigate(Screen.Details.createRoute(animeId))
                 }
