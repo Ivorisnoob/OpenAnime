@@ -1,10 +1,10 @@
-# OpenAnime
+# OpenStream
 
 A modern Android application for browsing and streaming anime, built with Jetpack Compose and Material Design 3 Expressive.
 
 ## Overview
 
-OpenAnime provides a native Android experience for discovering and watching anime content. The app fetches metadata from The Movie Database (TMDB) and streams video through the Vidking player, all wrapped in a beautiful Material Design 3 Expressive interface.
+OpenStream provides a native Android experience for discovering and watching anime content. The app fetches metadata from The Movie Database (TMDB) and streams video through the Vidking player, all wrapped in a beautiful Material Design 3 Expressive interface.
 
 ## Features
 
@@ -49,8 +49,8 @@ OpenAnime provides a native Android experience for discovering and watching anim
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/ivorisnoob/OpenAnime.git
-cd OpenAnime
+git clone https://github.com/ivorisnoob/OpenStream.git
+cd OpenStream
 ```
 
 ### 2. Configure TMDB API Key
@@ -76,7 +76,7 @@ You can obtain a free API key from [The Movie Database](https://www.themoviedb.o
 ## Project Structure
 
 ```
-com.ivor.openanime/
+com.ivor.OpenStream/
 ├── data/
 │   ├── remote/          # API interfaces and DTOs
 │   └── repository/      # Repository implementations
@@ -97,7 +97,7 @@ com.ivor.openanime/
 
 ## Architecture
 
-OpenAnime follows Clean Architecture principles with clear separation of concerns:
+OpenStream follows Clean Architecture principles with clear separation of concerns:
 
 ### Data Layer
 - **TmdbApi:** Retrofit interface for TMDB endpoints
