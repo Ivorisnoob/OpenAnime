@@ -31,22 +31,26 @@ class PlayerViewModel @Inject constructor(
     private val _remoteSubtitles = MutableStateFlow<List<SubtitleDto>>(emptyList())
     val remoteSubtitles = _remoteSubtitles.asStateFlow()
 
-    fun loadSeasonDetails(tmdbId: Int, seasonNumber: Int, currentEpisodeNumber: Int) {
+    fun loadSeasonDetails(mediaType: String, tmdbId: Int, seasonNumber: Int, currentEpisodeNumber: Int) {
         viewModelScope.launch {
-            _isLoadingEpisodes.value = true
-            try {
-                // Fetch full season details
-                val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, seasonNumber)
-                
-                // Filter for episodes after the current one
-                // We keep upcoming episodes.
-                _nextEpisodes.value = seasonDetails.episodes.filter { it.episodeNumber > currentEpisodeNumber }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                _isLoadingEpisodes.value = false
+            if (mediaType != "movie") {
+                _isLoadingEpisodes.value = true
+                try {
+                    // Fetch full season details
+                    val seasonDetails = tmdbApi.getSeasonDetails(tmdbId, seasonNumber)
+
+                    // Filter for episodes after the current one
+                    // We keep upcoming episodes.
+                    _nextEpisodes.value = seasonDetails.episodes.filter { it.episodeNumber > currentEpisodeNumber }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    _isLoadingEpisodes.value = false
+                }
+            } else {
+                _nextEpisodes.value = emptyList()
             }
-            
+
             // Fetch subtitles independently
             try {
                 val jsonElement = subtitleApi.searchSubtitles(tmdbId)

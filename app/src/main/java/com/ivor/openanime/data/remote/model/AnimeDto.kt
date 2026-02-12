@@ -6,28 +6,49 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AnimeDto(
     @SerialName("id") val id: Int,
-    @SerialName("name") val name: String,
-    @SerialName("overview") val overview: String,
-    @SerialName("poster_path") val posterPath: String?,
-    @SerialName("backdrop_path") val backdropPath: String?,
-    @SerialName("first_air_date") val firstAirDate: String?,
-    @SerialName("vote_average") val voteAverage: Double,
-    @SerialName("genre_ids") val genreIds: List<Int>
-)
+    @SerialName("name") val tvName: String? = null,
+    @SerialName("title") val movieTitle: String? = null,
+    @SerialName("overview") val overview: String? = null,
+    @SerialName("poster_path") val posterPath: String? = null,
+    @SerialName("backdrop_path") val backdropPath: String? = null,
+    @SerialName("first_air_date") val firstAirDate: String? = null,
+    @SerialName("release_date") val releaseDate: String? = null,
+    @SerialName("vote_average") val voteAverage: Double? = null,
+    @SerialName("genre_ids") val genreIds: List<Int>? = null,
+    @SerialName("media_type") val mediaType: String? = "tv"
+) {
+    val name: String
+        get() = movieTitle ?: tvName ?: ""
+
+    val date: String
+        get() = releaseDate ?: firstAirDate ?: ""
+
+    val isMovie: Boolean
+        get() = mediaType == "movie"
+}
 
 @Serializable
 data class AnimeDetailsDto(
     @SerialName("id") val id: Int,
-    @SerialName("name") val name: String,
+    @SerialName("name") val tvName: String? = null,
+    @SerialName("title") val movieTitle: String? = null,
     @SerialName("overview") val overview: String,
     @SerialName("poster_path") val posterPath: String?,
     @SerialName("backdrop_path") val backdropPath: String?,
-    @SerialName("first_air_date") val firstAirDate: String?,
+    @SerialName("first_air_date") val firstAirDate: String? = null,
+    @SerialName("release_date") val releaseDate: String? = null,
     @SerialName("vote_average") val voteAverage: Double,
-    @SerialName("number_of_seasons") val numberOfSeasons: Int,
-    @SerialName("number_of_episodes") val numberOfEpisodes: Int,
-    @SerialName("seasons") val seasons: List<SeasonDto>
-)
+    @SerialName("number_of_seasons") val numberOfSeasons: Int? = null,
+    @SerialName("number_of_episodes") val numberOfEpisodes: Int? = null,
+    @SerialName("seasons") val seasons: List<SeasonDto>? = null,
+    @SerialName("runtime") val runtime: Int? = null
+) {
+    val name: String
+        get() = movieTitle ?: tvName ?: ""
+
+    val date: String
+        get() = releaseDate ?: firstAirDate ?: ""
+}
 
 @Serializable
 data class SeasonDto(

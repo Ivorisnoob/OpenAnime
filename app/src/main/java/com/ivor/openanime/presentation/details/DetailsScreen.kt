@@ -56,6 +56,7 @@ import com.ivor.openanime.data.remote.model.EpisodeDto
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
+    mediaType: String,
     onBackClick: () -> Unit,
     onPlayClick: (Int, Int) -> Unit, // season, episode
     viewModel: DetailsViewModel = hiltViewModel()
@@ -138,7 +139,7 @@ fun DetailsScreen(
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "Rating: ${String.format("%.1f", details.voteAverage)} • ${details.firstAirDate?.take(4)}",
+                                        text = "Rating: ${String.format("%.1f", details.voteAverage)} • ${details.date.take(4)}",
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -153,7 +154,7 @@ fun DetailsScreen(
                                     onClick = {
                                         // Play logic: First episode of selected season, or S1E1 fallback
                                         val seasonNum = seasonDetails?.seasonNumber 
-                                            ?: details.seasons.firstOrNull()?.seasonNumber ?: 1
+                                            ?: details.seasons?.firstOrNull()?.seasonNumber ?: 1
                                         val episodeNum = 1 // Default to first episode
                                         onPlayClick(seasonNum, episodeNum)
                                     },
@@ -178,31 +179,33 @@ fun DetailsScreen(
                         }
 
                         // Season Selector
-                        item {
-                            Text(
-                                text = "Seasons",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            LazyRow(
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
-                                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(
-                                    items = details.seasons,
-                                    key = { it.seasonNumber }
-                                ) { season ->
-                                    val isSelected = seasonDetails?.seasonNumber == season.seasonNumber
-                                    FilterChip(
-                                        selected = isSelected,
-                                        onClick = { viewModel.loadSeason(season.seasonNumber) },
-                                        label = { Text(season.name) },
-                                        shape = ExpressiveShapes.small
-                                    )
+                        if (!details.seasons.isNullOrEmpty()) {
+                            item {
+                                Text(
+                                    text = "Seasons",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LazyRow(
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(
+                                        items = details.seasons!!,
+                                        key = { it.seasonNumber }
+                                    ) { season ->
+                                        val isSelected = seasonDetails?.seasonNumber == season.seasonNumber
+                                        FilterChip(
+                                            selected = isSelected,
+                                            onClick = { viewModel.loadSeason(season.seasonNumber) },
+                                            label = { Text(season.name) },
+                                            shape = ExpressiveShapes.small
+                                        )
+                                    }
                                 }
+                                Spacer(modifier = Modifier.height(16.dp))
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
                         }
 
                         // Episodes List

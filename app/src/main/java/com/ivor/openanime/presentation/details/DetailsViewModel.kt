@@ -20,6 +20,7 @@ class DetailsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val animeId: Int = checkNotNull(savedStateHandle["animeId"])
+    private val mediaType: String = checkNotNull(savedStateHandle["mediaType"])
     
     private val _uiState = MutableStateFlow<DetailsUiState>(DetailsUiState.Loading)
     val uiState: StateFlow<DetailsUiState> = _uiState.asStateFlow()
@@ -31,14 +32,16 @@ class DetailsViewModel @Inject constructor(
     fun loadDetails() {
         viewModelScope.launch {
             _uiState.value = DetailsUiState.Loading
-            repository.getAnimeDetails(animeId)
+            repository.getMediaDetails(animeId, mediaType)
                 .onSuccess { details ->
                     _uiState.value = DetailsUiState.Success(details)
                     // Load the first season by default - usually season 1 or the first in list
                     // Filter out season 0 (Specials) if desired, but for now just take first.
-                    val defaultSeason = details.seasons.find { it.seasonNumber == 1 } ?: details.seasons.firstOrNull()
-                    defaultSeason?.let { season ->
-                        loadSeason(season.seasonNumber)
+                    details.seasons?.let { seasons ->
+                        val defaultSeason = seasons.find { it.seasonNumber == 1 } ?: seasons.firstOrNull()
+                        defaultSeason?.let { season ->
+                            loadSeason(season.seasonNumber)
+                        }
                     }
                 }
                 .onFailure { exception ->
