@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+
 package com.ivor.openanime.presentation.player.components
 
 import androidx.compose.animation.AnimatedContent
@@ -30,8 +32,9 @@ import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -82,7 +85,6 @@ private enum class SettingsPage {
 
 val SPEED_OPTIONS = listOf(0.25f, 0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerSettingsSheet(
     onDismiss: () -> Unit,
@@ -430,9 +432,8 @@ private fun SubtitleSettingsMenu(
                             if (isSelected) {
                                 when (loadingState) {
                                     SubtitleLoadingState.LOADING -> {
-                                        CircularProgressIndicator(
+                                        LoadingIndicator(
                                             modifier = Modifier.size(16.dp),
-                                            strokeWidth = 2.dp,
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     }
