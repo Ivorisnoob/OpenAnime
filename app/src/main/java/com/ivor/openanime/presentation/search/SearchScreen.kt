@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SearchScreen(
     onBackClick: () -> Unit,
-    onAnimeClick: (Int) -> Unit,
+    onAnimeClick: (Int, String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -239,7 +239,7 @@ fun SearchScreen(
                             items(uiState.searchResults, key = { it.id }) { anime ->
                                 AnimeCard(
                                     anime = anime,
-                                    onClick = { onAnimeClick(anime.id) }
+                                    onClick = { onAnimeClick(anime.id, anime.mediaType ?: "tv") }
                                 )
                             }
                         }

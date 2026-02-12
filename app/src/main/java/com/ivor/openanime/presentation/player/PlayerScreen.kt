@@ -74,6 +74,7 @@ import com.ivor.openanime.presentation.player.components.ExoPlayerView
 @kotlin.OptIn(ExperimentalMaterial3ExpressiveApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
+    mediaType: String,
     tmdbId: Int,
     season: Int,
     episode: Int,
@@ -100,14 +101,18 @@ fun PlayerScreen(
 
     // Trigger data fetch
     LaunchedEffect(tmdbId, season, episode) {
-        viewModel.loadSeasonDetails(tmdbId, season, episode)
+        viewModel.loadSeasonDetails(mediaType, tmdbId, season, episode)
     }
 
     // Embed URL for extraction
-    val embedUrl = "https://www.vidking.net/embed/tv/$tmdbId/$season/$episode?autoPlay=true&color=663399" 
+    val embedUrl = if (mediaType == "movie") {
+        "https://www.vidking.net/embed/movie/$tmdbId?autoPlay=true&color=663399"
+    } else {
+        "https://www.vidking.net/embed/tv/$tmdbId/$season/$episode?autoPlay=true&color=663399"
+    }
     var videoUrl by rememberSaveable { mutableStateOf<String?>(null) }
     
-    val currentTitle = "Season $season - Episode $episode"
+    val currentTitle = if (mediaType == "movie") "Movie" else "Season $season - Episode $episode"
 
     // Fullscreen management
     fun enterFullscreen() {
@@ -279,7 +284,7 @@ fun PlayerScreen(
                 item {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Season $season Episode $episode",
+                            text = if (mediaType == "movie") "Movie" else "Season $season Episode $episode",
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onBackground
                         )

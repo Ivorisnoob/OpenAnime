@@ -43,7 +43,7 @@ import com.ivor.openanime.presentation.home.AnimeCard
 @Composable
 fun WatchHistoryScreen(
     onBackClick: () -> Unit,
-    onAnimeClick: (Int) -> Unit,
+    onAnimeClick: (Int, String) -> Unit,
     viewModel: WatchHistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -120,7 +120,7 @@ fun WatchHistoryScreen(
                         items(uiState.history, key = { it.id }) { anime ->
                             AnimeCard(
                                 anime = anime,
-                                onClick = { onAnimeClick(anime.id) }
+                                onClick = { onAnimeClick(anime.id, anime.mediaType ?: "tv") }
                             )
                         }
                     }

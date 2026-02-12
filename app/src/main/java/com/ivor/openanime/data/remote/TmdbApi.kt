@@ -18,7 +18,7 @@ interface TmdbApi {
         @Query("with_keywords") keywords: String = "210024|287501" // Optionally specify anime-specific keywords
     ): TmdbResponse<AnimeDto>
 
-    @GET("search/tv")
+    @GET("search/multi")
     suspend fun searchAnime(
         @Query("query") query: String,
         @Query("page") page: Int = 1
@@ -26,6 +26,11 @@ interface TmdbApi {
 
     @GET("tv/{id}")
     suspend fun getAnimeDetails(
+        @Path("id") id: Int
+    ): AnimeDetailsDto
+
+    @GET("movie/{id}")
+    suspend fun getMovieDetails(
         @Path("id") id: Int
     ): AnimeDetailsDto
 

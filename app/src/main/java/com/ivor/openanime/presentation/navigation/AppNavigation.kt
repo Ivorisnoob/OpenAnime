@@ -17,11 +17,11 @@ sealed class Screen(val route: String) {
     data object Home : Screen("home")
     data object Search : Screen("search")
     data object History : Screen("history")
-    data object Details : Screen("details/{animeId}") {
-        fun createRoute(animeId: Int) = "details/$animeId"
+    data object Details : Screen("details/{mediaType}/{animeId}") {
+        fun createRoute(mediaType: String, animeId: Int) = "details/$mediaType/$animeId"
     }
-    data object Player : Screen("player/{animeId}/{season}/{episode}") {
-        fun createRoute(animeId: Int, season: Int, episode: Int) = "player/$animeId/$season/$episode"
+    data object Player : Screen("player/{mediaType}/{animeId}/{season}/{episode}") {
+        fun createRoute(mediaType: String, animeId: Int, season: Int, episode: Int) = "player/$mediaType/$animeId/$season/$episode"
     }
 }
 
@@ -36,7 +36,7 @@ fun AppNavigation(
         composable(Screen.Home.route) {
             HomeScreen(
                 onAnimeClick = { animeId ->
-                    navController.navigate(Screen.Details.createRoute(animeId))
+                    navController.navigate(Screen.Details.createRoute("tv", animeId))
                 },
                 onSearchClick = {
                     navController.navigate(Screen.Search.route)
@@ -50,8 +50,8 @@ fun AppNavigation(
         composable(Screen.Search.route) {
             SearchScreen(
                 onBackClick = { navController.popBackStack() },
-                onAnimeClick = { animeId ->
-                    navController.navigate(Screen.Details.createRoute(animeId))
+                onAnimeClick = { animeId, mediaType ->
+                    navController.navigate(Screen.Details.createRoute(mediaType, animeId))
                 }
             )
         }
@@ -59,21 +59,26 @@ fun AppNavigation(
         composable(Screen.History.route) {
             WatchHistoryScreen(
                 onBackClick = { navController.popBackStack() },
-                onAnimeClick = { animeId ->
-                    navController.navigate(Screen.Details.createRoute(animeId))
+                onAnimeClick = { animeId, mediaType ->
+                    navController.navigate(Screen.Details.createRoute(mediaType, animeId))
                 }
             )
         }
         
         composable(
             route = Screen.Details.route,
-            arguments = listOf(navArgument("animeId") { type = NavType.IntType })
+            arguments = listOf(
+                navArgument("mediaType") { type = NavType.StringType },
+                navArgument("animeId") { type = NavType.IntType }
+            )
         ) { backStackEntry ->
+            val mediaType = backStackEntry.arguments?.getString("mediaType") ?: "tv"
             val animeId = backStackEntry.arguments?.getInt("animeId") ?: return@composable
             DetailsScreen(
+                mediaType = mediaType,
                 onBackClick = { navController.popBackStack() },
                 onPlayClick = { season, episode ->
-                    navController.navigate(Screen.Player.createRoute(animeId, season, episode))
+                    navController.navigate(Screen.Player.createRoute(mediaType, animeId, season, episode))
                 }
             )
         }
@@ -81,22 +86,25 @@ fun AppNavigation(
         composable(
             route = Screen.Player.route,
             arguments = listOf(
+                navArgument("mediaType") { type = NavType.StringType },
                 navArgument("animeId") { type = NavType.IntType },
                 navArgument("season") { type = NavType.IntType },
                 navArgument("episode") { type = NavType.IntType }
             )
         ) { backStackEntry ->
+            val mediaType = backStackEntry.arguments?.getString("mediaType") ?: "tv"
             val animeId = backStackEntry.arguments?.getInt("animeId") ?: return@composable
             val season = backStackEntry.arguments?.getInt("season") ?: return@composable
             val episode = backStackEntry.arguments?.getInt("episode") ?: return@composable
             
             PlayerScreen(
+                mediaType = mediaType,
                 tmdbId = animeId,
                 season = season,
                 episode = episode,
                 onBackClick = { navController.popBackStack() },
                 onEpisodeClick = { newEpisode ->
-                    navController.navigate(Screen.Player.createRoute(animeId, season, newEpisode)) {
+                    navController.navigate(Screen.Player.createRoute(mediaType, animeId, season, newEpisode)) {
                         // Pop up to the current player screen to avoid deep stacking
                         popUpTo(Screen.Player.route) { inclusive = true }
                     }
