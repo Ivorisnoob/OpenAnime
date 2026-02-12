@@ -26,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -148,15 +150,57 @@ fun AnimeCard(
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
-        AsyncImage(
-            model = "https://image.tmdb.org/t/p/w500${anime.posterPath}",
-            contentDescription = anime.name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(0.7f)
-                .clip(ExpressiveShapes.medium)
-        )
+        Box {
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${anime.posterPath}",
+                contentDescription = anime.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(0.7f)
+                    .clip(ExpressiveShapes.medium)
+            )
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (anime.originalLanguage != null) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = anime.originalLanguage.uppercase(),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                        ),
+                        border = null,
+                        modifier = Modifier.height(24.dp)
+                    )
+                }
+                if (anime.mediaType == "movie") {
+                    SuggestionChip(
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = "MOVIE",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        border = null,
+                        modifier = Modifier.height(24.dp)
+                    )
+                }
+            }
+        }
 
         Text(
             text = anime.name,

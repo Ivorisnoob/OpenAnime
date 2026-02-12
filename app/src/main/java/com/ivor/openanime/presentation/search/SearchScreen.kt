@@ -37,6 +37,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.SearchBarValue
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.runtime.Composable
@@ -197,15 +200,43 @@ fun SearchScreen(
             }
         }
     ) { innerPadding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when {
-                uiState.isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                SearchFilter.entries.forEachIndexed { index, filter ->
+                    SegmentedButton(
+                        selected = uiState.filter == filter,
+                        onClick = { viewModel.onFilterSelected(filter) },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = SearchFilter.entries.size
+                        ),
+                        label = {
+                            Text(
+                                when (filter) {
+                                    SearchFilter.ALL -> "All"
+                                    SearchFilter.MOVIE -> "Movies"
+                                    SearchFilter.TV -> "TV Shows"
+                                }
+                            )
+                        }
+                    )
                 }
+            }
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when {
+                    uiState.isLoading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
                 uiState.error != null -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),

@@ -15,7 +15,8 @@ data class AnimeDto(
     @SerialName("release_date") val releaseDate: String? = null,
     @SerialName("vote_average") val voteAverage: Double? = null,
     @SerialName("genre_ids") val genreIds: List<Int>? = null,
-    @SerialName("media_type") val mediaType: String? = "tv"
+    @SerialName("media_type") val mediaType: String? = "tv",
+    @SerialName("original_language") val originalLanguage: String? = null
 ) {
     val name: String
         get() = movieTitle ?: tvName ?: ""

@@ -15,9 +15,13 @@ class AnimeRepositoryImpl @Inject constructor(
         api.getPopularAnime(page = page).results
     }
 
-    override suspend fun searchAnime(query: String, page: Int): Result<List<AnimeDto>> = runCatching {
-        api.searchAnime(query = query, page = page).results
-            .filter { it.mediaType == "tv" || it.mediaType == "movie" }
+    override suspend fun searchAnime(query: String, page: Int, filter: String): Result<List<AnimeDto>> = runCatching {
+        when (filter) {
+            "movie" -> api.searchMovie(query, page).results.map { it.copy(mediaType = "movie") }
+            "tv" -> api.searchTv(query, page).results.map { it.copy(mediaType = "tv") }
+            else -> api.searchMulti(query, page).results
+                .filter { it.mediaType == "tv" || it.mediaType == "movie" }
+        }
     }
 
     override suspend fun getAnimeDetails(id: Int): Result<AnimeDetailsDto> = runCatching {
