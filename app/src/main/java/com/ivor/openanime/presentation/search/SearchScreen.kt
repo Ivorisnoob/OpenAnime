@@ -256,7 +256,7 @@ fun SearchScreen(
                     }
                 }
                 uiState.searchResults.isNotEmpty() -> {
-                    AnimatedVisibility(
+                    androidx.compose.animation.AnimatedVisibility(
                         visible = true,
                         enter = fadeIn() + slideInVertically { it / 3 },
                     ) {
@@ -296,4 +296,5 @@ fun SearchScreen(
             }
         }
     }
+}
 }

@@ -518,7 +518,7 @@ fun ExoPlayerView(
                             .buildUpon()
                             .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
                             .clearOverridesOfType(C.TRACK_TYPE_TEXT)
-                            .setOverrideForType(override)
+                            .addOverride(override)
                             .build()
                     }
                 }
